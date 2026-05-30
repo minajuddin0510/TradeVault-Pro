@@ -1,0 +1,21 @@
+{
+  "name": "TRADEVAULT PRO",
+  "short_name": "TradeVault",
+  "description": "Track. Analyze. Improve.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0B0F14",
+  "theme_color": "#0B0F14",
+  "icons": [
+    {
+      "src": "logo.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg"
+    },
+    {
+      "src": "logo.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg"
+    }
+  ]
+}

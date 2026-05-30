@@ -1,0 +1,372 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="TRADEVAULT PRO - Track. Analyze. Improve." />
+  <meta name="theme-color" content="#0B0F14" />
+  <title>TRADEVAULT PRO</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/styles.css" />
+</head>
+<body>
+  <div class="app-bg-glow" aria-hidden="true"></div>
+
+  <div id="welcomeModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="welcomeTitle">
+    <div class="modal-card">
+      <h2 id="welcomeTitle">Welcome to TradeVault Pro</h2>
+      <p class="modal-subtitle">Track. Analyze. Improve.</p>
+      <label for="firstTimeName">What should we call you?</label>
+      <input id="firstTimeName" type="text" placeholder="Minaj" maxlength="40" />
+      <button id="welcomeContinueBtn" class="btn btn-primary" type="button">Continue</button>
+    </div>
+  </div>
+
+  <div id="closeTradeModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="closeTradeTitle">
+    <div class="modal-card modal-wide">
+      <div class="modal-head-row">
+        <h2 id="closeTradeTitle">Close Position</h2>
+        <button id="closeTradeCancelX" class="icon-btn" type="button" aria-label="Close">✕</button>
+      </div>
+      <form id="closeTradeForm" class="grid-form two-col">
+        <label>Exit Date
+          <input id="closeExitDate" type="date" required />
+        </label>
+        <label>Exit Price
+          <input id="closeExitPrice" type="number" step="0.01" required placeholder="0.00" />
+        </label>
+        <label>Profit / Loss
+          <input id="closePnL" type="number" step="0.01" required placeholder="0.00" />
+        </label>
+        <label>Notes
+          <textarea id="closeNotes" rows="3" placeholder="Write closing notes..."></textarea>
+        </label>
+        <div class="modal-actions full-row">
+          <button id="closeTradeCancelBtn" type="button" class="btn btn-ghost">Cancel</button>
+          <button type="submit" class="btn btn-primary">Close Position</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="app" class="app-shell">
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-top">
+        <button id="sidebarToggle" class="icon-btn" type="button" aria-label="Toggle Sidebar">☰</button>
+      </div>
+      <nav class="menu" aria-label="Main menu">
+        <button class="menu-item active" data-page="dashboard">📊 <span>Dashboard</span></button>
+        <button class="menu-item" data-page="open-positions">🟡 <span>Open Positions</span></button>
+        <button class="menu-item" data-page="closed-positions">🟢 <span>Closed Positions</span></button>
+        <button class="menu-item" data-page="add-trade">➕ <span>Add Trade</span></button>
+        <button class="menu-item" data-page="analytics">📈 <span>Analytics</span></button>
+        <button class="menu-item" data-page="monthly-reports">📅 <span>Monthly Reports</span></button>
+        <button class="menu-item" data-page="exports">📥 <span>Exports</span></button>
+        <button class="menu-item" data-page="settings">⚙ <span>Settings</span></button>
+      </nav>
+    </aside>
+
+    <div class="main-shell">
+      <header class="app-header">
+        <div class="brand-wrap">
+          <img src="logo.jpg" alt="Minaj Enterprises logo" class="brand-logo" />
+          <div>
+            <h1>Minaj Enterprises</h1>
+            <p>TradeVault Pro</p>
+          </div>
+        </div>
+
+        <div class="profile-wrap">
+          <button id="profileBtn" class="profile-btn" type="button" aria-haspopup="true" aria-expanded="false">
+            <span>👤</span>
+            <span id="profileName">Trader</span>
+          </button>
+          <div id="profileMenu" class="dropdown hidden" role="menu">
+            <button data-action="edit-name" type="button">Edit Name</button>
+            <button data-action="export-data" type="button">Export Data</button>
+            <button data-action="import-data" type="button">Import Data</button>
+            <button data-action="reset-journal" type="button" class="danger">Reset Journal</button>
+          </div>
+        </div>
+      </header>
+
+      <main class="content-shell">
+        <section id="page-dashboard" class="page active">
+          <h2>Performance Dashboard</h2>
+          <p class="page-subtitle">Your real-time trading pulse.</p>
+          <div id="kpiGrid" class="kpi-grid"></div>
+        </section>
+
+        <section id="page-open-positions" class="page">
+          <h2>Open Positions</h2>
+          <p class="page-subtitle">Actively managed trades.</p>
+          <div id="openPositionsGrid" class="cards-grid"></div>
+        </section>
+
+        <section id="page-closed-positions" class="page">
+          <h2>Closed Positions</h2>
+          <p class="page-subtitle">Historical execution and outcomes.</p>
+          <div class="table-controls">
+            <input id="closedSearch" type="search" placeholder="Search trades..." />
+            <select id="closedMonthFilter">
+              <option value="all">All Months</option>
+            </select>
+            <select id="closedAssetFilter">
+              <option value="all">All Assets</option>
+            </select>
+            <select id="closedResultFilter">
+              <option value="all">All Results</option>
+              <option value="win">Wins</option>
+              <option value="loss">Losses</option>
+            </select>
+          </div>
+          <div class="table-wrap">
+            <table id="closedTable">
+              <thead>
+                <tr>
+                  <th data-sort="exitDate">Date</th>
+                  <th data-sort="assetDisplay">Asset</th>
+                  <th data-sort="tradeType">Trade Type</th>
+                  <th data-sort="direction">Direction</th>
+                  <th data-sort="entryPrice">Entry Price</th>
+                  <th data-sort="exitPrice">Exit Price</th>
+                  <th data-sort="profitLoss">P/L</th>
+                  <th data-sort="status">Status</th>
+                  <th data-sort="durationLabel">Duration</th>
+                  <th data-sort="monthLabel">Month</th>
+                  <th data-sort="yearLabel">Year</th>
+                </tr>
+              </thead>
+              <tbody id="closedTableBody"></tbody>
+            </table>
+          </div>
+          <div class="pagination-row">
+            <button id="closedPrevPage" class="btn btn-ghost" type="button">Prev</button>
+            <span id="closedPageInfo">Page 1</span>
+            <button id="closedNextPage" class="btn btn-ghost" type="button">Next</button>
+          </div>
+        </section>
+
+        <section id="page-add-trade" class="page">
+          <h2>Add Trade</h2>
+          <p class="page-subtitle">Create a precise, structured trade ticket.</p>
+          <form id="tradeForm" class="trade-form grid-form">
+            <label>Asset
+              <select id="asset" required>
+                <option value="Bitcoin">Bitcoin</option>
+                <option value="Ethereum">Ethereum</option>
+                <option value="Nifty 50">Nifty 50</option>
+                <option value="Sensex">Sensex</option>
+                <option value="Bank Nifty">Bank Nifty</option>
+                <option value="Others">Others</option>
+              </select>
+            </label>
+
+            <label id="assetNameWrap" class="hidden">Asset Name
+              <input id="assetName" type="text" placeholder="ITC / Reliance / TCS..." />
+            </label>
+
+            <label>Trade Type
+              <select id="tradeType" required>
+                <option value="Crypto Option Selling">Crypto Option Selling</option>
+                <option value="Stock Option Selling">Stock Option Selling</option>
+                <option value="Stock Option Buying">Stock Option Buying</option>
+                <option value="Equity Intraday">Equity Intraday</option>
+                <option value="Equity Swing">Equity Swing</option>
+                <option value="Futures Trading">Futures Trading</option>
+                <option value="Other">Other</option>
+              </select>
+            </label>
+
+            <label>Direction
+              <select id="direction" required>
+                <option value="Call Sell">Call Sell</option>
+                <option value="Put Sell">Put Sell</option>
+                <option value="Call Buy">Call Buy</option>
+                <option value="Put Buy">Put Buy</option>
+                <option value="Equity Buy">Equity Buy</option>
+                <option value="Equity Sell">Equity Sell</option>
+              </select>
+            </label>
+
+            <label>Position Duration
+              <select id="positionDuration" required>
+                <option value="Intraday">Intraday</option>
+                <option value="Overnight">Overnight</option>
+                <option value="Weekly">Weekly</option>
+                <option value="Monthly Expiry">Monthly Expiry</option>
+                <option value="Long Term">Long Term</option>
+              </select>
+            </label>
+
+            <label>Entry Date
+              <input id="entryDate" type="date" required />
+            </label>
+
+            <label>Entry Price
+              <input id="entryPrice" type="number" step="0.01" min="0" required />
+            </label>
+
+            <label>Quantity
+              <input id="quantity" type="number" step="1" min="1" required />
+            </label>
+
+            <label>Strike Price (Optional)
+              <input id="strikePrice" type="number" step="0.01" min="0" />
+            </label>
+
+            <label>Expiry Date (Optional)
+              <input id="expiryDate" type="date" />
+            </label>
+
+            <label>Premium (Optional)
+              <input id="premium" type="number" step="0.01" min="0" />
+            </label>
+
+            <label>Margin Used (Optional)
+              <input id="marginUsed" type="number" step="0.01" min="0" />
+            </label>
+
+            <div class="full-row">
+              <label>OTM Percentage</label>
+              <div class="otm-row">
+                <button class="otm-btn" type="button" data-otm="1">1%</button>
+                <button class="otm-btn" type="button" data-otm="1.5">1.5%</button>
+                <button class="otm-btn" type="button" data-otm="2">2%</button>
+                <button class="otm-btn" type="button" data-otm="2.5">2.5%</button>
+                <button class="otm-btn" type="button" data-otm="3">3%</button>
+                <button class="otm-btn" type="button" data-otm="custom">Custom</button>
+              </div>
+              <input id="otmPercentage" type="number" step="0.1" min="0" placeholder="Selected OTM %" />
+            </div>
+
+            <label>Trend
+              <select id="trend" required>
+                <option value="Uptrend">Uptrend</option>
+                <option value="Downtrend">Downtrend</option>
+                <option value="Sideways">Sideways</option>
+              </select>
+            </label>
+
+            <label>IV Level
+              <select id="ivLevel" required>
+                <option value="Low">Low</option>
+                <option value="Medium">Medium</option>
+                <option value="High">High</option>
+                <option value="Very High">Very High</option>
+              </select>
+            </label>
+
+            <label class="full-row">Notes
+              <textarea id="notes" rows="4" placeholder="Trade plan, execution details, psychology notes..."></textarea>
+            </label>
+
+            <label>Status
+              <input id="status" type="text" value="OPEN" readonly />
+            </label>
+
+            <div class="full-row">
+              <button class="btn btn-primary" type="submit">Save Trade</button>
+            </div>
+          </form>
+        </section>
+
+        <section id="page-analytics" class="page">
+          <h2>Analytics</h2>
+          <p class="page-subtitle">Quant-level insights from your trading journal.</p>
+          <div class="charts-grid">
+            <div class="chart-card"><h3>Equity Curve</h3><canvas id="chartEquityCurve"></canvas></div>
+            <div class="chart-card"><h3>Monthly Profit Trend</h3><canvas id="chartMonthlyProfit"></canvas></div>
+            <div class="chart-card"><h3>Profit by Asset</h3><canvas id="chartProfitByAsset"></canvas></div>
+            <div class="chart-card"><h3>Profit by Strategy</h3><canvas id="chartProfitByStrategy"></canvas></div>
+            <div class="chart-card"><h3>Win Rate by Asset</h3><canvas id="chartWinRateByAsset"></canvas></div>
+            <div class="chart-card"><h3>Win Rate by Trade Type</h3><canvas id="chartWinRateByTradeType"></canvas></div>
+            <div class="chart-card"><h3>Win Rate by Trend</h3><canvas id="chartWinRateByTrend"></canvas></div>
+            <div class="chart-card"><h3>Open vs Closed Trades</h3><canvas id="chartOpenVsClosed"></canvas></div>
+            <div class="chart-card"><h3>Drawdown Analysis</h3><canvas id="chartDrawdown"></canvas></div>
+          </div>
+          <div class="analytics-lower-grid">
+            <article class="panel">
+              <h3>Monthly Performance Heatmap</h3>
+              <div id="monthlyHeatmap" class="heatmap-grid"></div>
+            </article>
+            <article class="panel">
+              <h3>Performance Highlights</h3>
+              <div id="performanceHighlights" class="highlights"></div>
+            </article>
+          </div>
+        </section>
+
+        <section id="page-monthly-reports" class="page">
+          <h2>Monthly Reports</h2>
+          <p class="page-subtitle">Automated month-wise summaries.</p>
+          <div id="monthlyReportsList" class="report-cards"></div>
+        </section>
+
+        <section id="page-exports" class="page">
+          <h2>Exports</h2>
+          <p class="page-subtitle">Professional spreadsheet exports.</p>
+          <div class="exports-grid">
+            <button class="btn btn-primary export-btn" data-export="current-month" type="button">Export Current Month</button>
+            <button class="btn btn-primary export-btn" data-export="previous-month" type="button">Export Previous Month</button>
+            <button class="btn btn-primary export-btn" data-export="entire" type="button">Export Entire Journal</button>
+            <button class="btn btn-primary export-btn" data-export="open" type="button">Export Open Positions</button>
+            <button class="btn btn-primary export-btn" data-export="closed" type="button">Export Closed Positions</button>
+          </div>
+        </section>
+
+        <section id="page-settings" class="page">
+          <h2>Settings</h2>
+          <p class="page-subtitle">Personalize and manage your journal.</p>
+          <div class="settings-grid">
+            <article class="panel">
+              <h3>Change Name</h3>
+              <div class="inline-row">
+                <input id="settingsNameInput" type="text" placeholder="Your display name" maxlength="40" />
+                <button id="settingsSaveNameBtn" class="btn btn-primary" type="button">Save</button>
+              </div>
+            </article>
+
+            <article class="panel">
+              <h3>Theme Preferences</h3>
+              <div class="inline-row">
+                <label for="accentColorSelect">Accent Color</label>
+                <select id="accentColorSelect">
+                  <option value="blue">Blue (Default)</option>
+                  <option value="teal">Teal</option>
+                  <option value="gold">Gold</option>
+                </select>
+              </div>
+              <button id="saveThemeBtn" class="btn btn-ghost" type="button">Apply Theme</button>
+            </article>
+
+            <article class="panel panel-danger">
+              <h3>Data Management</h3>
+              <div class="settings-actions">
+                <button id="exportBackupBtn" class="btn btn-ghost" type="button">Export Backup</button>
+                <button id="importBackupBtn" class="btn btn-ghost" type="button">Import Backup</button>
+                <button id="resetAllDataBtn" class="btn btn-danger" type="button">Reset All Data</button>
+              </div>
+            </article>
+          </div>
+        </section>
+      </main>
+
+      <footer class="app-footer">
+        <p>© 2026 Minaj Enterprises. All Rights Reserved.</p>
+        <p>TradeVault Pro™ is a product of Minaj Enterprises.</p>
+        <p>Track. Analyze. Improve.</p>
+      </footer>
+    </div>
+  </div>
+
+  <input id="importFileInput" type="file" class="hidden" accept=".json,.xlsx,.xls" />
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script type="module" src="assets/js/app.js"></script>
+</body>
+</html>
